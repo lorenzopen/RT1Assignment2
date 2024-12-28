@@ -59,20 +59,23 @@ class ActionClientNode:
     
     def feedback_callback(self, feedback):
         
-        rospy.loginfo(f"Feedback: {feedback.stat}")
+        rospy.loginfo(f"Feedback: {feedback.stat}, Current Pose: {feedback.actual_pose}")
 
     def run(self):
         
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
+            rospy.loginfo("Waiting for input to send a goal...")
+            try:
                 user_input = input("Enter 'x y' to send a goal or 'c' to cancel: ")
                 if user_input.lower() == 'c':
                     self.cancel_goal()
                 else:
                     x, y = map(float, user_input.split())
                     self.send_goal(x, y)
-           
-        rate.sleep()
+            except Exception as e:
+                rospy.logerr(f"Invalid input: {e}")
+            rate.sleep()
 
 if __name__ == "__main__":
     node = ActionClientNode()
