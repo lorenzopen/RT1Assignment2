@@ -3,6 +3,7 @@
 import rospy
 import actionlib
 from geometry_msgs.msg import Pose, Twist
+from std_msgs.msg import Float64MultiArray
 from nav_msgs.msg import Odometry
 from assignment_2_2024.msg import PlanningAction, PlanningGoal
 from assignment2.msg import PositionVelocity  # Custom message
@@ -23,7 +24,7 @@ class ActionClientNode:
 
         # Sub to /odom topic
         self.sub_odom = rospy.Subscriber('/odom', Odometry, self.odom_callback)
-
+        
         # robot state
         self.current_pose = Pose()
         self.current_velocity = Twist()
@@ -50,6 +51,10 @@ class ActionClientNode:
         self.client.send_goal(goal, feedback_cb=self.feedback_callback)
         #rospy.loginfo(f"Goal sent: x={x}, y={y}")
     
+        #publish last goal entered
+        self.last_goal = rospy.Publisher('/last_goal', Float64MultiArray, queue_size=10)
+        self.last_goal.publish(data=[x, y])
+    	
     #cancel goal
     def cancel_goal(self):
        
@@ -67,6 +72,7 @@ class ActionClientNode:
         while not rospy.is_shutdown():
             rospy.loginfo("Waiting for input to send a goal...")
             try:
+                
                 user_input = input("Enter 'x y' to send a goal or 'c' to cancel: ")
                 if user_input.lower() == 'c':
                     self.cancel_goal()
