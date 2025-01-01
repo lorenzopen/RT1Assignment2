@@ -3,10 +3,10 @@
 import rospy
 import actionlib
 from geometry_msgs.msg import Pose, Twist
-from std_msgs.msg import Float64MultiArray
 from nav_msgs.msg import Odometry
 from assignment_2_2024.msg import PlanningAction, PlanningGoal
 from assignment2.msg import PositionVelocity  # Custom message
+from assignment2.srv import GetLastGoal, GetLastGoalResponse
 from tf import transformations
 
 class ActionClientNode:
@@ -50,11 +50,8 @@ class ActionClientNode:
         goal.target_pose.pose.position.y = y
         self.client.send_goal(goal, feedback_cb=self.feedback_callback)
         #rospy.loginfo(f"Goal sent: x={x}, y={y}")
-    
-        #publish last goal entered
-        self.last_goal = rospy.Publisher('/last_goal', Float64MultiArray, queue_size=10)
-        self.last_goal.publish(data=[x, y])
-    	
+
+        
     #cancel goal
     def cancel_goal(self):
        
@@ -63,8 +60,8 @@ class ActionClientNode:
     
     
     def feedback_callback(self, feedback):
-        
-        rospy.loginfo(f"Feedback: {feedback.stat}, Current Pose: {feedback.actual_pose}")
+        rospy.loginfo(f"Feedback: {feedback.stat}") 
+        #Current Pose: {feedback.actual_pose}")
 
     def run(self):
         
@@ -72,15 +69,25 @@ class ActionClientNode:
         while not rospy.is_shutdown():
             rospy.loginfo("Waiting for input to send a goal...")
             try:
-                
-                user_input = input("Enter 'x y' to send a goal or 'c' to cancel: ")
+                user_input = input("Enter 'x y' to send a goal, 'c' to cancel, or 'prev' to retrieve the previous goal: ")
                 if user_input.lower() == 'c':
                     self.cancel_goal()
+                elif user_input.lower() == 'prev':
+                    rospy.wait_for_service('get_last_goal')
+                    try:
+                        get_last_goal = rospy.ServiceProxy('get_last_goal', GetLastGoal)
+                        response = get_last_goal()
+                        if response.last_goal:
+                            rospy.loginfo(f"Previous goal: x={response.last_goal[0]}, y={response.last_goal[1]}")
+                        else:
+                            rospy.loginfo("No previous goal available.")
+                    except rospy.ServiceException as e:
+                        rospy.logerr(f"Service call failed: {e}")
                 else:
                     x, y = map(float, user_input.split())
                     self.send_goal(x, y)
             except Exception as e:
-                rospy.logerr(f"Invalid input: {e}")
+                rospy.logerr(f"Error: {e}")
             rate.sleep()
 
 if __name__ == "__main__":

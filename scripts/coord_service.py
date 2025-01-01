@@ -1,33 +1,24 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import Float64MultiArray
+from assignment_2_2024.msg import PlanningActionGoal
+from assignment2.srv import GetLastGoal, GetLastGoalResponse
 
-class CoordNode:
-
-    def last_g_clbk(self, msg):
-        rospy.loginfo("Last goal entered: %s", msg.data)
-        self.last_goal = msg.data
-
+class GoalServer:
     def __init__(self):
-        rospy.init_node('coord_server_node')
-        
-        self.last_goal = None
-        self.sub = rospy.Subscriber('/last_goal', Float64MultiArray, self.last_g_clbk)    
+        rospy.init_node('goal_server')
+        self.last_goal = []
+        self.sub = rospy.Subscriber('/reaching_goal/goal', PlanningActionGoal, self.goal_callback)
+        self.srv = rospy.Service('get_last_goal', GetLastGoal, self.handle_get_last_goal)
+        rospy.spin()
 
-    def run(self):
-        rate = rospy.Rate(20)
-        
-        while not rospy.is_shutdown():
-            user_input = input("Enter 'prev' for previous coordinates: ")
-            
-            if user_input.lower() == 'prev':
-                if self.last_goal:
-                    rospy.loginfo("Previous coordinates: %s", self.last_goal)
-                else:
-                    rospy.loginfo("No previous coordinates available.")
-            rate.sleep()
+    def goal_callback(self, msg):
+        position = msg.goal.target_pose.pose.position
+        rospy.loginfo(f"Received new goal: x={position.x}, y={position.y}")
+        self.last_goal = [position.x, position.y]
 
-if __name__ == "__main__":
-    node = CoordNode()
-    node.run()
+    def handle_get_last_goal(self, req):
+        return GetLastGoalResponse(last_goal=self.last_goal)
+
+if __name__ == '__main__':
+    goal_server = GoalServer()
