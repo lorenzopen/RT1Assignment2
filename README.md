@@ -13,7 +13,7 @@ This script implements a ROS client node that interacts with a `/reaching_goal` 
 * **Sends Goals:** Allows sending goals (target poses) to the action server. Users can specify x and y coordinates through console input.
 * **Goal Feedback:** Receives feedback from the action server about the goal execution status.
 * **Goal Cancellation:** Enables canceling the currently active goal by enter 'c'.
-* **Custom Message Publishing:** Publishes a custom message (`PositionVelocity`) containing the robot's current position and velocity data.
+* **Custom Message Publishing:** Publishes a custom message (`PositionVelocity`) containing the robot's current position and velocity. --> rostopic echo /`position_velocity`
 * **Retrieving Last Goal :** a service named `get_last_goal`, the node can retrieve and display the previously sent goal by enter 'prev'. It also is possible using rqt and call the service  `get_last_goal`.
 
 
