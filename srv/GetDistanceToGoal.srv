@@ -1,0 +1,3 @@
+---
+float64 distance  # Distance from the robot to the lastgoal
+
