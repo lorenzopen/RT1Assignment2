@@ -5,23 +5,27 @@ import math
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from assignment_2_2024.msg import PlanningActionFeedback
+from assignment2.srv import GetLastGoal, GetLastGoalResponse
 from assignment2.srv import GetDistanceToGoal, GetDistanceToGoalResponse
 from std_msgs.msg import Bool
 
 robot_position = None
-last_goal = None
 warning_pub = None
 
 def odom_callback(msg):
     global robot_position
     robot_position = msg.pose.pose.position
 
-def goal_callback(msg):
-    global last_goal
-    last_goal = msg.feedback.actual_pose.pose.position
-
 def handle_get_distance_to_goal(req):
-    if last_goal is None or robot_position is None:
+    try:
+        get_last_goal = rospy.ServiceProxy('get_last_goal', GetLastGoal)
+        response = get_last_goal()
+        last_goal = response.last_goal
+    except rospy.ServiceException as e:
+        rospy.logerr("Service call failed: %s" % e)
+        return GetDistanceToGoalResponse(0.0)
+    
+    if robot_position is None:
         return GetDistanceToGoalResponse(0.0)
     
     distance = math.sqrt((last_goal.x - robot_position.x) ** 2 + (last_goal.y - robot_position.y) ** 2)
