@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 
-import rospy
-import actionlib
-from geometry_msgs.msg import Pose, Twist
-from nav_msgs.msg import Odometry
-from assignment_2_2024.msg import PlanningAction, PlanningGoal
-from assignment2.msg import PositionVelocity  # Custom message
-from assignment2.srv import GetLastGoal, GetLastGoalResponse
-from tf import transformations
+# import rospy
+# import actionlib
+# from geometry_msgs.msg import Pose, Twist
+# from nav_msgs.msg import Odometry
+# from assignment_2_2024.msg import PlanningAction, PlanningGoal
+# from assignment2.msg import PositionVelocity  # Custom message
+# from assignment2.srv import GetLastGoal, GetLastGoalResponse
+# from tf import transformations
 
 class ActionClientNode:
+    # """
+    # A ROS node action client to send goals to a robot and monitor its state.
+
+    # Attributes:
+    #     client (SimpleActionClient): The action client for sending goals.
+    #     pub_position_velocity (Publisher): Publisher for the custom PositionVelocity message.
+    #     sub_odom (Subscriber): Subscriber to the /odom topic to get the robot's state.
+    #     current_pose (Pose): The current pose of the robot.
+    #     current_velocity (Twist): The current velocity of the robot.
+    # """
     def __init__(self):
         # Initialize the ROS node
         rospy.init_node('action_client_node')

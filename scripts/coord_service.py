@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import rospy
-from assignment_2_2024.msg import PlanningActionGoal
-from assignment2.srv import GetLastGoal, GetLastGoalResponse
+# import rospy
+# from assignment_2_2024.msg import PlanningActionGoal
+# from assignment2.srv import GetLastGoal, GetLastGoalResponse
 
 class GoalServer:
     def __init__(self):
