@@ -5,14 +5,14 @@
 import os
 import subprocess
 import sys
-sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../scripts'))
 
-#subprocess.call('doxygen Doxyfile.in', shell=True)
+subprocess.call('doxygen Doxyfile.in', shell=True)
 show_authors = True
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'RT2_assignment1'
+project = 'assignment2'
 copyright = '2025, Lorenzo Penna'
 author = 'Lorenzo Penna'
 release = '0.1'

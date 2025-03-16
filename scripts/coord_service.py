@@ -1,11 +1,25 @@
 #!/usr/bin/env python
+"""
+.. module:: coord_service
+   :platform: Unix
+   :synopsis: ROS service that returns the last goal received by the goal server.
 
-# import rospy
-# from assignment_2_2024.msg import PlanningActionGoal
-# from assignment2.srv import GetLastGoal, GetLastGoalResponse
+.. moduleauthor:: Lorenzo Penna
+
+This module contains the ROS service that returns the last goal received by the goal server.
+"""
+
+import rospy
+from assignment_2_2024.msg import PlanningActionGoal
+from assignment2.srv import GetLastGoal, GetLastGoalResponse
 
 class GoalServer:
+    """
+    The GoalServer class initializes the ROS node, subscribes to the goal topic, and provides a service to get the last goal.
+
+    """
     def __init__(self):
+        
         rospy.init_node('goal_server')
         self.last_goal = []
         self.sub = rospy.Subscriber('/reaching_goal/goal', PlanningActionGoal, self.goal_callback)

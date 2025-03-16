@@ -1,25 +1,34 @@
 #!/usr/bin/env python
+"""
+.. module:: action_client
+   :platform: Unix
+   :synopsis: A ROS node action client to send goals to a robot and monitor its state.
 
-# import rospy
-# import actionlib
-# from geometry_msgs.msg import Pose, Twist
-# from nav_msgs.msg import Odometry
-# from assignment_2_2024.msg import PlanningAction, PlanningGoal
-# from assignment2.msg import PositionVelocity  # Custom message
-# from assignment2.srv import GetLastGoal, GetLastGoalResponse
-# from tf import transformations
+.. moduleauthor:: Lorenzo Penna
+
+This module contains the ActionClientNode class which is a ROS node that sends goals to a robot and monitors its state.
+"""
+
+import rospy
+import actionlib
+from geometry_msgs.msg import Pose, Twist
+from nav_msgs.msg import Odometry
+from assignment_2_2024.msg import PlanningAction, PlanningGoal
+from assignment2.msg import PositionVelocity  # Custom message
+from assignment2.srv import GetLastGoal, GetLastGoalResponse
+from tf import transformations
 
 class ActionClientNode:
-    # """
-    # A ROS node action client to send goals to a robot and monitor its state.
+    """
+    The ActionClientNode class initializes the ROS node, sets up the action client, publishers, and subscribers.
 
-    # Attributes:
-    #     client (SimpleActionClient): The action client for sending goals.
-    #     pub_position_velocity (Publisher): Publisher for the custom PositionVelocity message.
-    #     sub_odom (Subscriber): Subscriber to the /odom topic to get the robot's state.
-    #     current_pose (Pose): The current pose of the robot.
-    #     current_velocity (Twist): The current velocity of the robot.
-    # """
+    Attributes:
+        client (SimpleActionClient): The action client for sending goals.
+        pub_position_velocity (Publisher): Publisher for the custom PositionVelocity message.
+        sub_odom (Subscriber): Subscriber to the /odom topic to get the robot's state.
+        current_pose (Pose): The current pose of the robot.
+        current_velocity (Twist): The current velocity of the robot.
+    """
     def __init__(self):
         # Initialize the ROS node
         rospy.init_node('action_client_node')
@@ -39,9 +48,7 @@ class ActionClientNode:
         self.current_pose = Pose()
         self.current_velocity = Twist()
 
-    #Callback to update robot's position and velocity.
-    def odom_callback(self, msg):        
-        
+    def odom_callback(self, msg):
         self.current_pose = msg.pose.pose
         self.current_velocity = msg.twist.twist
 
@@ -52,23 +59,18 @@ class ActionClientNode:
         custom_msg.vel_x = self.current_velocity.linear.x
         custom_msg.vel_z = self.current_velocity.angular.z
         self.pub_position_velocity.publish(custom_msg)
-    #Send a goal
+
     def send_goal(self, x, y):
-        
         goal = PlanningGoal()
         goal.target_pose.pose.position.x = x
         goal.target_pose.pose.position.y = y
         self.client.send_goal(goal, feedback_cb=self.feedback_callback)
         #rospy.loginfo(f"Goal sent: x={x}, y={y}")
 
-        
-    #cancel goal
     def cancel_goal(self):
-       
         self.client.cancel_goal()
         rospy.loginfo("Goal cancelled")
-    
-    
+
     def feedback_callback(self, feedback):
         rospy.loginfo(f"Feedback: {feedback.stat}") 
         #Current Pose: {feedback.actual_pose}")
