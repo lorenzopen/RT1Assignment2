@@ -86,22 +86,51 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The GoalServer class initializes the ROS node, subscribes to the goal topic, and provides a service to get the last goal.</span>
 
+<span class="sd">    Attributes:</span>
+<span class="sd">        last_goal (list): A list containing the x and y coordinates of the last goal received by the goal server.</span>
+<span class="sd">        sub (Subscriber): A ROS subscriber to the `/reaching_goal/goal` topic, which listens for new goals.</span>
+<span class="sd">        srv (Service): A ROS service named `get_last_goal` that handles requests for the last goal.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the GoalServer node, subscriber, and service.</span>
+
+<span class="sd">        This method sets up the ROS node, initializes the `last_goal` attribute, subscribes to the `/reaching_goal/goal` topic, </span>
+<span class="sd">        and advertises the `get_last_goal` service. The node will continue running until it is shut down.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;goal_server&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_goal</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sub</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Subscriber</span><span class="p">(</span><span class="s1">&#39;/reaching_goal/goal&#39;</span><span class="p">,</span> <span class="n">PlanningActionGoal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal_callback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">srv</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;get_last_goal&#39;</span><span class="p">,</span> <span class="n">GetLastGoal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_get_last_goal</span><span class="p">)</span>
         <span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">goal_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<div class="viewcode-block" id="GoalServer.goal_callback"><a class="viewcode-back" href="../index.html#coord_service.GoalServer.goal_callback">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">goal_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for the goal subscriber. Updates the last goal received.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            msg (PlanningActionGoal): The goal message received from the `/reaching_goal/goal` topic.</span>
+
+<span class="sd">        This function extracts the x and y coordinates of the goal from the `msg` and updates the `last_goal` attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">position</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">goal</span><span class="o">.</span><span class="n">target_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span>
         <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received new goal: x=</span><span class="si">{</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, y=</span><span class="si">{</span><span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_goal</span> <span class="o">=</span> <span class="p">[</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_goal</span> <span class="o">=</span> <span class="p">[</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">]</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">handle_get_last_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">GetLastGoalResponse</span><span class="p">(</span><span class="n">last_goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">last_goal</span><span class="p">)</span></div>
+<div class="viewcode-block" id="GoalServer.handle_get_last_goal"><a class="viewcode-back" href="../index.html#coord_service.GoalServer.handle_get_last_goal">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">handle_get_last_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles requests for the last goal received.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (GetLastGoal): The service request.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            GetLastGoalResponse: A response containing the last goal as a list of two floats [x, y].</span>
+<span class="sd">                                 If no goal has been received , the list will be empty.</span>
+
+<span class="sd">        This function retrieves the last goal stored in the `last_goal` attribute and returns it as part of the service response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">GetLastGoalResponse</span><span class="p">(</span><span class="n">last_goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">last_goal</span><span class="p">)</span></div></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">goal_server</span> <span class="o">=</span> <span class="n">GoalServer</span><span class="p">()</span>

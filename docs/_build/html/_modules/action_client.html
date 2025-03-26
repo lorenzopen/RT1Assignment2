@@ -99,6 +99,12 @@
 <span class="sd">        current_velocity (Twist): The current velocity of the robot.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the ActionClientNode, sets up the action client, publishers, and subscribers.</span>
+
+<span class="sd">        This method initializes the ROS node, sets up the action client to communicate with the action server,</span>
+<span class="sd">        and creates publishers and subscribers to handle robot state and custom messages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Initialize the ROS node</span>
         <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;action_client_node&#39;</span><span class="p">)</span>
 
@@ -110,14 +116,23 @@
         <span class="c1"># Set up Publisher for custom message</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pub_position_velocity</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s1">&#39;/position_velocity&#39;</span><span class="p">,</span> <span class="n">PositionVelocity</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
-        <span class="c1"># Sub to /odom topic</span>
+        <span class="c1"># Subscribe to /odom topic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_odom</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Subscriber</span><span class="p">(</span><span class="s1">&#39;/odom&#39;</span><span class="p">,</span> <span class="n">Odometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">odom_callback</span><span class="p">)</span>
         
-        <span class="c1"># robot state</span>
+        <span class="c1"># Robot state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pose</span> <span class="o">=</span> <span class="n">Pose</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span> <span class="o">=</span> <span class="n">Twist</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">odom_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionClientNode.odom_callback"><a class="viewcode-back" href="../index.html#action_client.ActionClientNode.odom_callback">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">odom_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for the odometry subscriber. Updates the robot&#39;s position and velocity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            msg (Odometry): The odometry message received from the topic.</span>
+
+<span class="sd">        This function extracts the robot&#39;s current pose and velocity from the odometry message and publishes</span>
+<span class="sd">        them as a custom PositionVelocity message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pose</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">pose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">twist</span><span class="o">.</span><span class="n">twist</span>
 
@@ -127,25 +142,55 @@
         <span class="n">custom_msg</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span>
         <span class="n">custom_msg</span><span class="o">.</span><span class="n">vel_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">x</span>
         <span class="n">custom_msg</span><span class="o">.</span><span class="n">vel_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span><span class="o">.</span><span class="n">angular</span><span class="o">.</span><span class="n">z</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pub_position_velocity</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">custom_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_position_velocity</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">custom_msg</span><span class="p">)</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionClientNode.send_goal"><a class="viewcode-back" href="../index.html#action_client.ActionClientNode.send_goal">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sends a goal to the action server.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): The x-coordinate of the goal.</span>
+<span class="sd">            y (float): The y-coordinate of the goal.</span>
+
+<span class="sd">        This function creates a PlanningGoal message with the specified coordinates and sends it to the action server.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">goal</span> <span class="o">=</span> <span class="n">PlanningGoal</span><span class="p">()</span>
         <span class="n">goal</span><span class="o">.</span><span class="n">target_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="n">goal</span><span class="o">.</span><span class="n">target_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="n">feedback_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feedback_callback</span><span class="p">)</span>
-        <span class="c1">#rospy.loginfo(f&quot;Goal sent: x={x}, y={y}&quot;)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Goal sent: x=</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">, y=</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">cancel_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionClientNode.cancel_goal"><a class="viewcode-back" href="../index.html#action_client.ActionClientNode.cancel_goal">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">cancel_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cancels the current goal.</span>
+
+<span class="sd">        This function sends a cancel request to the action server to stop the robot from reaching the current goal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">cancel_goal</span><span class="p">()</span>
-        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Goal cancelled&quot;</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Goal cancelled&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feedback</span><span class="p">):</span>
-        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feedback: </span><span class="si">{</span><span class="n">feedback</span><span class="o">.</span><span class="n">stat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
-        <span class="c1">#Current Pose: {feedback.actual_pose}&quot;)</span>
+<div class="viewcode-block" id="ActionClientNode.feedback_callback"><a class="viewcode-back" href="../index.html#action_client.ActionClientNode.feedback_callback">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feedback</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for feedback from the action server.</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+<span class="sd">        Args:</span>
+<span class="sd">            feedback: The feedback message from the action server.</span>
+
+<span class="sd">        This function logs feedback from the action server, such as the robot&#39;s current state or progress.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feedback: </span><span class="si">{</span><span class="n">feedback</span><span class="o">.</span><span class="n">stat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="ActionClientNode.run"><a class="viewcode-back" href="../index.html#action_client.ActionClientNode.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the main loop of the ActionClientNode, waiting for user input to send or cancel goals.</span>
+
+<span class="sd">        This function continuously waits for user input to:</span>
+<span class="sd">        - Send a new goal by entering coordinates.</span>
+<span class="sd">        - Cancel the current goal by entering &#39;c&#39;.</span>
+<span class="sd">        - Retrieve the previous goal by entering &#39;prev&#39;.</span>
+
+<span class="sd">        It handles user input and interacts with the action server and the `get_last_goal` service.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Rate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
             <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Waiting for input to send a goal...&quot;</span><span class="p">)</span>
@@ -169,7 +214,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span></div>
+            <span class="n">rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span></div></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">node</span> <span class="o">=</span> <span class="n">ActionClientNode</span><span class="p">()</span>
