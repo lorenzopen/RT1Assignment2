@@ -1,5 +1,7 @@
 # Assignment 2 Part 1
 
+[**View the Full Documentation**](https://lorenzopen.github.io/RT1Assignment2/)
+
 To start the whole simulation after cloned the pkg:
 
 -->  roslaunch assignment2 assignment2.launch
